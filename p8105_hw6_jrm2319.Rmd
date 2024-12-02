@@ -22,7 +22,7 @@ homicides_data = homicides_data %>%
   mutate(city_state = str_c(city, ", ", state)) 
 
 homicides_data = homicides_data %>%
-  mutate(solved_homicides = ifelse(disposition == "Open/No arrest", 0, 1))
+  mutate(solved_homicides = ifelse(disposition == "Closed by arrest", 1, 0))
 
 homicides_data = homicides_data %>%
   filter(!(city_state %in% c("Dallas, TX", "Phoenix, AZ", "Kansas City, MO", "Tulsa, AL")))
@@ -34,10 +34,26 @@ homicides_data = homicides_data %>%
   mutate(victim_age = as.numeric(ifelse(victim_age == "unknown", NA, victim_age)))
 
 head(homicides_data)
-
 ```
 
 ### Part B: For the city of Baltimore, MD, use the glm function to fit a logistic regression with resolved vs unresolved as the outcome and victim age, sex and race as predictors
+
+```{r}
+bmore_data = homicides_data %>%
+  filter(city_state == "Baltimore, MD") %>%
+  filter(!is.na(solved_homicides), !is.na(victim_age), !is.na(victim_sex), !is.na(victim_race))
+
+fit_logistic = bmore_data |> 
+  glm(solved_homicides ~ victim_age + victim_sex + victim_race, data = _, family = binomial()) 
+
+fit_logistic |> 
+  broom::tidy(conf.int = TRUE) |> 
+  mutate(OR = exp(estimate)) |>
+  select(term, log_OR = estimate, OR, conf.low, conf.high, p.value) |> 
+  knitr::kable(digits = 3)
+```
+
+
 
 ### Part C: Run glm for each of the cities in your dataset, and extract the adjusted odds ratio (and CI) for solving homicides comparing male victims to female victims.
 
