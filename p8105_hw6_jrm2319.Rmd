@@ -6,8 +6,36 @@ Date: 12/1/24
 ---
 
 ## Problem 2 
+```{r}
+library(rvest)
+library(tidyverse)
+
+url = "https://raw.githubusercontent.com/washingtonpost/data-homicides/master/homicide-data.csv"
+homicides_data = read_csv(url)
+head(homicides_data)
+```
 
 ### Part A: Create a city_state variable (e.g. “Baltimore, MD”), and a binary variable indicating whether the homicide is solved
+
+```{r}
+homicides_data = homicides_data %>%
+  mutate(city_state = str_c(city, ", ", state)) 
+
+homicides_data = homicides_data %>%
+  mutate(solved_homicides = ifelse(disposition == "Open/No arrest", 0, 1))
+
+homicides_data = homicides_data %>%
+  filter(!(city_state %in% c("Dallas, TX", "Phoenix, AZ", "Kansas City, MO", "Tulsa, AL")))
+
+homicides_data = homicides_data %>%
+  filter(victim_race %in% c("White", "Black"))
+
+homicides_data = homicides_data %>%
+  mutate(victim_age = as.numeric(ifelse(victim_age == "unknown", NA, victim_age)))
+
+head(homicides_data)
+
+```
 
 ### Part B: For the city of Baltimore, MD, use the glm function to fit a logistic regression with resolved vs unresolved as the outcome and victim age, sex and race as predictors
 
