@@ -48,14 +48,16 @@ fit_logistic = bmore_data |>
 
 fit_logistic |> 
   broom::tidy(conf.int = TRUE) |> 
-  mutate(OR = exp(estimate)) |>
-  select(term, log_OR = estimate, OR, conf.low, conf.high, p.value) |> 
+  mutate(OR = exp(estimate),
+         lower_CI = exp(conf.low),
+         upper_CI = exp(conf.high)) |>
+  select(term, log_OR = estimate, OR, lower_CI, upper_CI) |> 
   knitr::kable(digits = 3)
 ```
 
 ### Part C: Run glm for each of the cities in your dataset, and extract the adjusted odds ratio (and CI) for solving homicides comparing male victims to female victims.
 ```{r}
-city_results = homicides_data %>%
+city_nest = homicides_data %>%
   filter(!is.na(solved_homicides), !is.na(victim_sex), !is.na(victim_race)) %>%
   group_by(city_state) %>%
   nest() %>%
@@ -67,22 +69,45 @@ city_results = homicides_data %>%
   unnest(results) %>% 
   mutate(
     OR = exp(estimate), 
+    lower_CI = exp(conf.low),   
+    upper_CI = exp(conf.high), 
     log_OR = estimate   
   ) %>% 
    filter(
     term != "(Intercept)",        
     term != "victim_sexUnknown"     
   ) %>%
-  select(city_state, term, log_OR, OR, conf.low, conf.high, p.value) # Select relevant columns
-city_results %>%
+  select(city_state, term, log_OR, OR, lower_CI, upper_CI) 
+city_nest %>%
   knitr::kable(digits = 3)
 ```
 
 ### Part D: Create a plot that shows the estimated ORs and CIs for each city. Organize cities according to estimated OR, and comment on the plot. 
 
+```{r}
+library(ggplot2)
+library(dplyr)
+
+city_nest %>% 
+  ggplot(aes(x = reorder(city_state, OR, FUN = median, descending = TRUE), y = OR)) + 
+  geom_point() + 
+  geom_errorbar(aes(ymin = lower_CI, ymax = upper_CI, width = 0.2)) +  
+  facet_wrap(~term) +
+  theme(axis.text.x = element_text(angle = 80, hjust = 1)) +
+  labs(
+    x = "City, State of Homicides", 
+    y = "Odds Ratio for Solving Homicides (M vs. F)"
+  )
+
+```
+Comment on the plot: New York, NY is the city with the lowest odds (-1.417) of solving a homicide when the victim is males compared to the victim being female. Albuquerque, NM (0.499) is the city with the highest odds of solving a homicide when the victim is males compared to the victim being female.In general  
+
 ## Problem 3
 
 ### Part A: Load and clean the data for regression analysis (i.e. convert numeric to factor where appropriate, check for missing data, etc.).
+```{r}
+
+```
 
 ### Part B: Propose a regression model for birthweight.
 
