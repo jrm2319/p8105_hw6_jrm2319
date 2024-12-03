@@ -100,7 +100,8 @@ city_nest %>%
   )
 
 ```
-Comment on the plot: New York, NY is the city with the lowest odds (-1.417) of solving a homicide when the victim is males compared to the victim being female. Albuquerque, NM (0.499) is the city with the highest odds of solving a homicide when the victim is males compared to the victim being female.In general  
+
+**Comment on the plot**: New York, NY is the city with the lowest odds (0.242) of solving a homicide when the victim is males compared to the victim being female. Albuquerque, NM (1.647) is the city with the highest odds of solving a homicide when the victim is males compared to the victim being female.In general, there is no explicit geographic pattern of the odds of solviung a homisice when the victim is males compared to females. 
 
 ## Problem 3
 
