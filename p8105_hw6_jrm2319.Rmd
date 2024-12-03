@@ -53,9 +53,30 @@ fit_logistic |>
   knitr::kable(digits = 3)
 ```
 
-
-
 ### Part C: Run glm for each of the cities in your dataset, and extract the adjusted odds ratio (and CI) for solving homicides comparing male victims to female victims.
+```{r}
+city_results = homicides_data %>%
+  filter(!is.na(solved_homicides), !is.na(victim_sex), !is.na(victim_race)) %>%
+  group_by(city_state) %>%
+  nest() %>%
+  mutate(
+    model = map(data, ~ glm(solved_homicides ~  victim_sex, 
+                            data = .x, family = binomial())),
+    results = map(model, ~ broom::tidy(.x, conf.int = TRUE))
+  ) %>%
+  unnest(results) %>% 
+  mutate(
+    OR = exp(estimate), 
+    log_OR = estimate   
+  ) %>% 
+   filter(
+    term != "(Intercept)",        
+    term != "victim_sexUnknown"     
+  ) %>%
+  select(city_state, term, log_OR, OR, conf.low, conf.high, p.value) # Select relevant columns
+city_results %>%
+  knitr::kable(digits = 3)
+```
 
 ### Part D: Create a plot that shows the estimated ORs and CIs for each city. Organize cities according to estimated OR, and comment on the plot. 
 
